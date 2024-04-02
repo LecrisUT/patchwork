@@ -29,7 +29,7 @@ def distro_name(c):
     }
     for name, sentinels in sentinel_files.items():
         for sentinel in sentinels:
-            if exists(c, f"/etc/{sentinel}"):
+            if exists(c, "/etc/{sentinel}".format(sentinel=sentinel)):
                 return name
     return "other"
 

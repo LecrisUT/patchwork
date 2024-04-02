@@ -101,16 +101,16 @@ def rsync(
         key_string = "-i " + " -i ".join(keys)
     # Get base cxn params
     user, host, port = c.user, c.host, c.port
-    port_string = f"-p {port}"
+    port_string = "-p {port}".format(port=port)
     # Remote shell (SSH) options
     rsh_string = ""
     # Strict host key checking
     disable_keys = "-o StrictHostKeyChecking=no"
     if not strict_host_keys and disable_keys not in ssh_opts:
-        ssh_opts += f" {disable_keys}"
+        ssh_opts += " {disable_keys}".format(disable_keys=disable_keys)
     rsh_parts = [key_string, port_string, ssh_opts]
     if any(rsh_parts):
-        rsh_string = f"--rsh='ssh {' '.join(rsh_parts)}'"
+        rsh_string = "--rsh='ssh {rsh_parts}'".format(rsh_parts=' '.join(rsh_parts))
     # Set up options part of string
     options_map = {
         "delete": "--delete" if delete else "",
@@ -118,7 +118,10 @@ def rsync(
         "rsh": rsh_string,
         "extra": rsync_opts,
     }
-    options = f"{options_map['delete']}{options_map['exclude']} -pthrvz {options_map['extra']} {options_map['rsh']}"
+    options = "{delete}{exclude} -pthrvz {extra} {rsh}".format(
+        delete=options_map['delete'], exclude=options_map['exclude'],
+        extra=options_map['extra'], rsh=options_map['rsh']
+    )
     # Create and run final command string
     # TODO: richer host object exposing stuff like .address_is_ipv6 or whatever
     if host.count(":") > 1:

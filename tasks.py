@@ -1,3 +1,4 @@
+from __future__ import print_function
 from importlib import import_module
 
 from invocations import docs
@@ -15,9 +16,9 @@ def sanity(c):
     """
     # Doesn't need to literally import everything, but "a handful" will do.
     for name in ("environment", "files", "transfers"):
-        mod = f"patchwork.{name}"
+        mod = "patchwork.{name}".format(name=name)
         import_module(mod)
-        print(f"Imported {mod} successfully")
+        print("Imported {mod} successfully".format(mod=mod))
 
 
 ns = Collection(docs, release, test, coverage, sanity, blacken)

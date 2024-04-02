@@ -29,4 +29,4 @@ def rubygem(c, gem):
     """
     Install a Ruby gem.
     """
-    return c.sudo(f"gem install -b --no-rdoc --no-ri {gem}")
+    return c.sudo("gem install -b --no-rdoc --no-ri {gem}".format(gem=gem))

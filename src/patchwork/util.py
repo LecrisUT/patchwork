@@ -144,4 +144,5 @@ def munge_docstring(f, inner):
 :param runner:
     Callable runner function or method. Should ideally be a bound method on the given context object!
 """  # noqa
-    return f"{f.__name__}{sig}\n{docstring}\n\n{params}"
+    return "{name}{sig}\n{docstring}\n\n{params}".format(name=f.__name__, sig=sig,
+                                                         docstring=docstring, params=params)
