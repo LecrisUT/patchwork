@@ -6,24 +6,17 @@ setup.py implementation, interesting because it parsed the first __init__.py and
 """
 
 import sys
-from ast import Assign, Name, parse
-from operator import attrgetter
+from ast import parse
 from os import path
 
 from setuptools import setup
 
-if sys.version_info[:2] >= (3, 12):
-    from ast import Del as Str
-else:
-    from ast import Str
-
-    if sys.version_info[0] == 2:
-        from itertools import ifilter as filter
-        from itertools import imap as map
-
 if sys.version_info[:2] > (3, 7):
     from ast import Constant
 else:
+    if sys.version_info[0] == 2:
+        from itertools import imap as map
+
     from ast import expr
 
     # Constant. Will never be used in Python =< 3.8
@@ -33,7 +26,8 @@ else:
 package_name = "patchwork"
 
 with open(
-    path.join(path.dirname(__file__), "README{extsep}rst".format(extsep=path.extsep)), "rt"
+    path.join(path.dirname(__file__), "README{extsep}rst".format(extsep=path.extsep)),
+    "rt",
 ) as fh:
     long_description = fh.read()
 
@@ -43,32 +37,19 @@ def main():
     with open(
         path.join(
             path.abspath(path.dirname(__file__)),
-            "src", "patchwork",
+            "src",
+            "patchwork",
             "_version{extsep}py".format(extsep=path.extsep),
         )
     ) as f:
         parsed_init = parse(f.read())
 
-    __version__ = next(map(
-        lambda node: node.value if isinstance(node, Constant) else node.s,
-        filter(
-            lambda node: isinstance(node, (Constant, Str)),
-            map(
-                attrgetter("value"),
-                filter(
-                    lambda node: isinstance(node, Assign)
-                    and any(
-                        filter(
-                            lambda name: isinstance(name, Name)
-                            and name.id == "__version__",
-                            node.targets,
-                        )
-                    ),
-                    parsed_init.body,
-                ),
-            ),
-        ),
-    ))
+    __version__ = ".".join(
+        map(
+            lambda node: str(node.value if isinstance(node, Constant) else node.n),
+            parsed_init.body[0].value.elts,
+        )
+    )
 
     setup(
         name=package_name,
@@ -76,7 +57,7 @@ def main():
         author_email="jeff@bitprophet.org",
         version=__version__,
         url="https://www.fabfile.org",
-        description=long_description[:long_description.find("\n")],
+        description=long_description[: long_description.find("\n")],
         long_description=long_description,
         long_description_content_type="text/x-rst",
         classifiers=[
@@ -102,7 +83,7 @@ def main():
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
             "Programming Language :: Python :: 3.12",
-            "Programming Language :: Python :: 3.13"
+            "Programming Language :: Python :: 3.13",
             "Topic :: Software Development",
             "Topic :: Software Development :: Build Tools",
             "Topic :: Software Development :: Libraries",
