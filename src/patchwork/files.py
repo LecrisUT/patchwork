@@ -4,8 +4,6 @@ Tools for file and directory management.
 
 import re
 
-from invoke.vendor import six
-
 from .util import set_runner
 
 
@@ -16,6 +14,9 @@ def directory(c, runner, path, user=None, group=None, mode=None):
 
     :param c:
         `~invoke.context.Context` within to execute commands.
+    :param runner:
+        Callable runner function or method. Should ideally be a
+        bound method on the given context object!
     :param str path:
         File path to directory.
     :param str user:
@@ -25,12 +26,12 @@ def directory(c, runner, path, user=None, group=None, mode=None):
     :param str mode:
         ``chmod`` compatible mode string to apply to the directory.
     """
-    runner("mkdir -p {}".format(path))
+    runner("mkdir -p {path}".format(path=path))
     if user is not None:
         group = group or user
-        runner("chown {}:{} {}".format(user, group, path))
+        runner("chown {user}:{group} {path}".format(user=user, group=group, path=path))
     if mode is not None:
-        runner("chmod {} {}".format(mode, path))
+        runner("chmod {mode} {path}".format(mode=mode, path=path))
 
 
 @set_runner
@@ -40,6 +41,9 @@ def exists(c, runner, path):
 
     :param c:
         `~invoke.context.Context` within to execute commands.
+    :param runner:
+        Callable runner function or method. Should ideally be a
+        bound method on the given context object!
     :param str path:
         Path to check for existence.
     """
@@ -66,6 +70,9 @@ def contains(c, runner, filename, text, exact=False, escape=True):
 
     :param c:
         `~invoke.context.Context` within to execute commands.
+    :param runner:
+        Callable runner function or method. Should ideally be a
+        bound method on the given context object!
     :param str filename:
         File path within which to check for ``text``.
     :param str text:
@@ -78,8 +85,8 @@ def contains(c, runner, filename, text, exact=False, escape=True):
     if escape:
         text = _escape_for_regex(text)
         if exact:
-            text = "^{}$".format(text)
-    egrep_cmd = 'egrep "{}" "{}"'.format(text, filename)
+            text = "^{text}$".format(text=text)
+    egrep_cmd = 'egrep "{text}" "{filename}"'.format(text=text, filename=filename)
     return runner(egrep_cmd, hide=True, warn=True).ok
 
 
@@ -105,6 +112,9 @@ def append(c, runner, filename, text, partial=False, escape=True):
 
     :param c:
         `~invoke.context.Context` within to execute commands.
+    :param runner:
+        Callable runner function or method. Should ideally be a
+        bound method on the given context object!
     :param str filename:
         File path to append onto.
     :param str text:
@@ -116,7 +126,7 @@ def append(c, runner, filename, text, partial=False, escape=True):
         Whether to perform regex-oriented escaping on ``text``.
     """
     # Normalize non-list input to be a list
-    if isinstance(text, six.string_types):
+    if isinstance(text, str):
         text = [text]
     for line in text:
         regex = "^" + _escape_for_regex(line) + ("" if partial else "$")
@@ -127,7 +137,7 @@ def append(c, runner, filename, text, partial=False, escape=True):
         ):
             continue
         line = line.replace("'", r"'\\''") if escape else line
-        runner("echo '{}' >> {}".format(line, filename))
+        runner("echo '{line}' >> {filename}".format(line=line, filename=filename))
 
 
 def _escape_for_regex(text):
